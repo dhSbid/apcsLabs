@@ -52,7 +52,7 @@ public class Concentration {
     }
 
     public static Card[] createRandomDeck () {
-        Card[] rv = Main.orderedDeck();
+        Card[] rv = Main13.orderedDeck();
 
         for (int i = 0; i < rv.length; i++) {
             int randNum = (int) (Math.random() * rv.length);
@@ -64,7 +64,7 @@ public class Concentration {
 
     public static Card[][] createRandomBoard () {
         Card[] deck = createRandomDeck();
-        Card[][] board = Main.makeBoard(deck);
+        Card[][] board = Main13.makeBoard(deck);
         return board;
     }
 
@@ -96,7 +96,7 @@ public class Concentration {
     public static void printScores (int[] a) {
         pr("Current score lineup:");
         for (int i = 0; i < a.length; i++) {
-            pr("\tPlayer " + (i + 1) + " has " + a[i] +  "points.");
+            pr("\tPlayer " + (i + 1) + " has " + a[i] +  " points.");
         }
     }
 
@@ -123,6 +123,7 @@ public class Concentration {
         pr("---------------------------------------------");
 
         while (cardsLeft(board) > 0) {
+            Main13.wait(1000);
             pr("\n\nTurn " + turnNum + "--------------------------------------------");
             for (int i = 0; i < players; i++) {
                 turn(scan, i, scores, board);
@@ -137,7 +138,7 @@ public class Concentration {
     public static void turn (Scanner scan, int num, int[] scores, Card[][] board){
         pr("Player " + (num + 1) + "'s turn: ");
         
-        int m1 = move(scan);
+        int m1 = move(scan, board);
         Card c1 = board[(m1 / 10) - 1][(m1 % 10) - 1];
         if (c1 != null) {
             c1.show();
@@ -145,7 +146,7 @@ public class Concentration {
         printBoard(board);
 
 
-        int m2 = move(scan);
+        int m2 = move(scan, board);
         Card c2 = board[(m2 / 10) - 1][(m2 % 10) - 1];
         if (c2 != null) {
             c2.show();
@@ -154,11 +155,19 @@ public class Concentration {
 
         if (c1 == null || c2 == null) {
             pr("well, since you chose a card that clearly doesn't exist, enjoy the loss of a turn :/");
+            if (c1 != null) {
+                c1.hide();
+            }
+            if (c2 != null) {
+                c2.hide();
+            }
         } else {
             if (c1.face == c2.face && c1 != c2) {
                 board[(m1 / 10) - 1][(m1 % 10) - 1] = null;
                 board[(m2 / 10) - 1][(m2 % 10) - 1] = null;           
                 scores[num]++;
+                pr("\nPoint get!");
+                Main13.wait(1000);
                 turn(scan, num, scores, board);
             } else {
                 c1.hide();
@@ -169,12 +178,27 @@ public class Concentration {
 
     }
 
-    public static int move (Scanner scan) {
-        pr("\tEnter move(rc, ex: 34): ");
+    public static int move (Scanner scan, Card[][] board) {
+        pr("\tEnter move(rc, ex: 34. 99 for cpu): ");
         int what = scan.nextInt();
+        
         while (("" + what).length() != 2) {
             pr("repite, por favor: ");
             what = scan.nextInt();
+        }
+
+        if (what == 99) {
+            pr("You have declared yourself incapable, a cpu will take over for you. ");
+            int rand1 = (int) (Math.random() * 7);
+            int rand2 = (int) (Math.random() * 8);
+            while (board[rand1][rand2] == null) {
+                rand1 = (int) (Math.random() * 7);
+                rand2 = (int) (Math.random() * 8);
+            }
+            
+            Main13.wait(1000);
+            pr("\nThe Cpu has spoken. Your move was " + (rand1 * 8 + rand2));
+            return (rand1 * 8 + rand2);
         }
 
         if (what % 10 > 8) {    //validating column
